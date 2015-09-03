@@ -23,11 +23,17 @@ except OSError:
 	pass
 #create and open new sell list
 sellList=open("sellList.txt", "w+")
+#print WTS to file
+sellList.write("WTS|")
 #get html from each url
 for url in urls[:-1]:
 	html=getHtml(url)
 	#open local file
-	myItems=open("myItems.txt", "rb+")
+	try:
+		myItems=open("myItems.txt", "rb+")
+	except OSError:
+		pass
+		print('Error: "myItems.txt" not found.')
 	#check if each line in the local file is in the html
 	for line in myItems:
 		#remove \r\n from the items
