@@ -1,6 +1,7 @@
 import urllib.request
 import re
 import os
+import operator
 
 #######################################
 #              FUNCTIONS
@@ -35,12 +36,12 @@ try:
 	os.remove("sellList.txt")
 except OSError:
 	pass
-#create and open new sell list
-sellList=open("sellList.txt", "w+")
-#print WTS to file
-sellList.write("WTS|")
 #list of urls to check
 urls=['http://wftrading.net/sets/','http://wftrading.net/archwings-aw-weapons/','http://wftrading.net/void-trader-items/','http://wftrading.net/syndicate-weapons-mods','http://wftrading.net/prime-weapons/','http://wftrading.net/prime-warframes/','http://wftrading.net/warframe/','http://wftrading.net/rifle/','http://wftrading.net/shotgun/','http://wftrading.net/pistol/','http://wftrading.net/melee/','http://wftrading.net/sentinel/','http://wftrading.net/aura/','http://wftrading.net/most-wanted-rare/','http://wftrading.net/event-mods']
+
+#make dict
+strDict={}
+
 #get html from each url
 for url in urls[:-1]:
 	html=getHtml(url)
@@ -66,10 +67,24 @@ for url in urls[:-1]:
 			tempItemPrice=findMidPrice(itemHtmlStr)
 			#remove "'"
 			itemPrice=remSub(tempItemPrice, {"'":""})
-			#create item with price
-			itemWithPrice=strItem + " " + itemPrice + "|"
-			#append item and price to file
-			sellList.write(itemWithPrice)
+			#add item to dict
+			strDict[strItem]=itemPrice
+
+#convert dict values to int
+intDict = dict((k,int(v)) for k,v in strDict.items())
+#sort tuples
+sortedIntList=sorted(intDict.items(), key=operator.itemgetter(1), reverse=True)
+#make string for output
+sellListStr="WTS|"
+#add items to sellListStr 
+for i in sortedIntList:
+	if len(sellListStr) < 270:
+		sellListStr+=i[0] + " {}|".format(i[1])
+#create and open new sell list
+sellList=open("sellList.txt", "w+")
+#write string to file
+sellList.write(sellListStr[:-1])	
+
 #close files
 myItems.close()
 sellList.close()
